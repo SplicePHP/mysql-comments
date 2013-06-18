@@ -8,7 +8,7 @@
     echo "<div class=\"accordion\">";
     echo "<div class=\"head\"><a href=\"#\">$table</a></div><div class=\"body\">";
     foreach($fields as $field){
-      echo "<div class=\"head1\"><a href=\"#\">{$field->Field}</a></div><div class=\"body1\">";
+      echo "<div class=\"head1\"><a href=\"#\">[&nbsp;<b>{$field->Field}</b>&nbsp;]&nbsp;&nbsp;&nbsp; [ {$field->Type} {$field->Collation} {$field->Extra} ]</a></div><div class=\"body1\">";
       echo $this->Form->textarea("$table.{$field->Field}", array('value'=>$field->Comment));
       echo "</div>";
     }
