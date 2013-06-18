@@ -3,9 +3,15 @@ mysql-comments
 
 Create and update multiple comments for mysql table columns.
 
+First of all and most important:
+Apply the first rule of web development.
+Thou shalt always be able to undo.
+Backup, backup and backup again XD
+
 This app needs cakephp 2.x to run.
 
 To get it up and running, do the following:
+===========================================
 
 Download the latest version of cakephp 2.x.
 
