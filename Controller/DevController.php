@@ -5,11 +5,23 @@ App::uses('Model', 'Model');
 class DevController extends AppController {
   
   public function index(){
-    $dbconf = $this->Session->read('dbconfig.database');
-    $db = ConnectionManager::getDataSource($dbconf);
+    $database = $this->Session->read('dbconfig.database');
+    $db = ConnectionManager::getDataSource($database);
     $tables = $db->listSources();
     if($this->request->is('post')||$this->request->is('put')){
       $data = $this->request->data;
+      $tblComments = $data['__TABLES__'];
+      unset($data['__TABLES__']);
+      foreach($tblComments as $table => $comment){
+        $tc = $db->execute("SELECT table_comment FROM INFORMATION_SCHEMA.TABLES WHERE table_schema='".$database."' AND table_name='$table'");
+        $result = $tc->fetch(PDO::FETCH_OBJ);
+        $tc = $result->table_comment;
+        if(!empty($comment) || !empty($tc)){
+          $comment = str_replace(array("\'", '\"', '"', "'"), array("'", '"', '\"', "\'"), $comment);
+          $comment = preg_replace('~\R~u', "\r\n", $comment);
+          $db->execute("ALTER TABLE $table COMMENT '$comment'");
+        }
+      }
       foreach($data as $table => $columns){
         $cols = $db->execute('SHOW FULL COLUMNS FROM ' . $table);
         while($column = $cols->fetch(PDO::FETCH_OBJ)){
@@ -32,13 +44,19 @@ class DevController extends AppController {
       $this->Session->setFlash('Comments Updated');
     }
     $schema = array();
+    $tblComments = array();
     foreach($tables as $table){
+      $tblComment = $db->execute("SELECT table_comment FROM INFORMATION_SCHEMA.TABLES WHERE table_schema='".$database."' AND table_name='$table'");
+      $result = $tblComment->fetch(PDO::FETCH_OBJ);
+      $tblComments[$table] = $result->table_comment;
+      
       $cols = $db->execute('SHOW FULL COLUMNS FROM ' . $table);
       while($column = $cols->fetch(PDO::FETCH_OBJ)){
         $schema[$table][$column->Field] = $column;  
       }      
     }
     $this->set(compact('schema'));
+    $this->set(compact('tblComments'));
   }
   
   public function connection(){
